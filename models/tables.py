@@ -7,9 +7,14 @@
 # There is an implicit 'id integer autoincrement' field
 # Consult manual for more options, validators, etc.
 
-import datetime
-
-
+db.define_table('stream_session',
+    Field('video_time'),
+    Field('host_name'),
+    Field('passphrase'),
+    Field('users'),
+    Field('playlist_url'),
+    Field('playing')
+)
 
 # after defining tables, uncomment below to enable auditing
 # auth.enable_record_versioning(db)

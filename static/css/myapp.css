@@ -17,6 +17,14 @@ table#user_selector tbody tr {
   border-bottom: 1px solid gray;
 }
 
+div.abs_center {
+  width: 50%; 
+  height: 50%;
+  min-width: 200px;
+  max-width: 400px;
+  padding: 40px;
+}
+
 /* line 16, ../sass/_main.scss */
 button:disabled {
   background-color: lightgray;

@@ -64,3 +64,14 @@ CREATE TABLE "auth_cas"(
     "renew" CHAR(1)
 );
 success!
+timestamp: 2018-06-06T12:12:01.067291
+CREATE TABLE "stream_session"(
+    "id" INTEGER PRIMARY KEY AUTOINCREMENT,
+    "video_time" CHAR(512),
+    "host_name" CHAR(512),
+    "passphrase" CHAR(512),
+    "users" CHAR(512),
+    "playlist_url" CHAR(512),
+    "playing" CHAR(512)
+);
+success!
