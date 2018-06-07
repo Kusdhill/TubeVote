@@ -1,5 +1,7 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 <link href="{{=URL('static','css/myapp.css')}}" rel="stylesheet" type="text/css"/>
+<link rel="stylesheet" href="{{=URL('static', 'font-awesome-4.6.3/css/font-awesome.min.css')}}">
+
 {{block head}}
 <script src="{{=URL('static', 'js/vue.js')}}"></script>
 <script>
@@ -20,17 +22,18 @@
     <!-- HOST VIEW -->
     <div v-if="is_host && !session_created">
         <h2></h2>
-        <input class="form-control" type="text" name='username' placeholder="username"/>
-        <input class="form-control" type="text" name='passphrase' placeholder="passphrase"/>
-        <input class="form-control" type="text" name='playlist_url' placeholder="playlist url"/>
+        <input class="form-control" type="text" name='username' value="Kunal" placeholder="username"/>
+        <input class="form-control" type="text" name='passphrase' value="thisisapass" placeholder="passphrase"/>
+        <input class="form-control" type="text" name='playlist_url' value="https://www.youtube.com/watch?v=q6EoRBvdVPQ&list=PLOy0j9AvlVZPto6IkjKfpu0Scx--7PGTC" placeholder="playlist url"/>
         <button type="button" class="btn btn-def btn-block" v-on:click="new_session">Login</button>
     </div>
 
     <!-- SESSION CREATED, HOST PLAYER VIEW -->
     <!-- https://developers.google.com/youtube/iframe_api_reference -->
     <div v-if="is_host && session_created">
+      <a href="http://127.0.0.1:8000/TubeVote/default/index">Start over</a>
       <h2>Hello, ${host_name}</h2>
-      <iframe v-bind:src="'https://www.youtube.com/embed/XvHSlHhh1gk?autoplay=0'" id="ytplayer" type="text/html" width="640" height="360" frameborder="0"></iframe>
+      <iframe v-bind:src="videos[0].embed" id="ytplayer" type="text/html" width="640" height="360" frameborder="0"></iframe>
 
       <br><br><br>
 
@@ -47,9 +50,9 @@
             <td>${video.title}</td>
             <td>${video.description}</td>
             <td>
-              ${video.votes}
-              <i class="fa fa-caret-up"></i>
-
+              <i class="fa fa-caret-up fa-2x" v-on:click="upvote(video)"></i>
+              <i class="fa fa-caret-down fa-2x" v-on:click="downvote(video)"></i>
+              <div style="text-align:center;">${video.votes}</div>
             </td>
           </tr>
         </tbody>

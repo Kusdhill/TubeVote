@@ -43,6 +43,7 @@ var app = function() {
             },
             function(data) {
                console.log("new session created")
+               self.vue.users.push(self.vue.host_name)
                self.get_playlist(self.vue.playlist_url);
                self.vue.session_created = true;
             }
@@ -63,6 +64,7 @@ var app = function() {
             var split = url.split('&list=')
             playlist_id = split[1];
             var str_index = '';
+            var embed = '';
             console.log(playlist_id)
 
             $.getJSON(playlist_items_url,
@@ -77,11 +79,43 @@ var app = function() {
                     console.log(data)
                     for (i = 0; i < data.items.length; i++) { 
                         str_index = i.toString();
+                        snippet = data.items[str_index].snippet;
+                        snippet.votes = 0;
+                        
+                        embed='https://www.youtube.com/embed/';
+                        embed+=snippet.resourceId.videoId+'?autoplay=1';
+                        console.log(embed)
+                        snippet.embed=embed;
                         //console.log(data.items[str_index].snippet.resourceId.videoId);
-                        self.vue.videos.push(data.items[str_index].snippet)
+                        self.vue.videos.push(snippet)
                     }
                 }
             );
+        }
+    }
+
+
+    self.upvote = function(video) {
+        for (i=0; i<self.vue.videos.length; i++){
+            if(video.title===self.vue.videos[i].title){
+                self.vue.videos[i].votes+=1;
+
+                self.vue.videos.sort(function(a,b) {
+                    return b.votes - a.votes
+                })       
+            }
+        }
+    }
+
+    self.downvote = function(video) {
+        for (i=0; i<self.vue.videos.length; i++){
+            if(video.title===self.vue.videos[i].title){
+                self.vue.videos[i].votes-=1;
+
+                self.vue.videos.sort(function(a,b) {
+                    return b.votes - a.votes
+                })
+            }
         }
     }
 
@@ -96,12 +130,15 @@ var app = function() {
             passphrase: '',
             playlist_url: '',
             session_created: false,
-            videos: []
+            videos: [],
+            users: []
         },
         methods: {
             host_view: self.host_view,
             new_session: self.new_session,
-            get_playlist: self.get_playlist
+            get_playlist: self.get_playlist,
+            upvote: self.upvote,
+            downvote: self.downvote
         }
 
     });
