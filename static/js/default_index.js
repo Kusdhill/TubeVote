@@ -43,11 +43,47 @@ var app = function() {
             },
             function(data) {
                console.log("new session created")
+               self.get_playlist(self.vue.playlist_url);
                self.vue.session_created = true;
             }
             );
         }
     };
+
+    self.get_playlist = function(url) {
+        console.log("getting playlist")
+        console.log(url)
+        var playlist_items_url = 'https://www.googleapis.com/youtube/v3/playlistItems';
+        var playlist_id = '';
+        
+        if(!url.includes('&list')){
+            alert("Please enter a valid playlist url");
+            throw new Error("invalid playlist_url");
+        }else{
+            var split = url.split('&list=')
+            playlist_id = split[1];
+            var str_index = '';
+            console.log(playlist_id)
+
+            $.getJSON(playlist_items_url,
+                {
+                    maxResults: '25',
+                    part: 'snippet',
+                    playlistId: playlist_id,
+                    key: 'AIzaSyA81ZBi5oLSK3xEdPjPaX1XlttqfLBoSIg'
+                },
+                function(data) {
+                    console.log("data")
+                    console.log(data)
+                    for (i = 0; i < data.items.length; i++) { 
+                        str_index = i.toString();
+                        //console.log(data.items[str_index].snippet.resourceId.videoId);
+                        self.vue.videos.push(data.items[str_index].snippet)
+                    }
+                }
+            );
+        }
+    }
 
     self.vue = new Vue({
         el: "#vue-div",
@@ -59,11 +95,13 @@ var app = function() {
             host_name: '',
             passphrase: '',
             playlist_url: '',
-            session_created: false
+            session_created: false,
+            videos: []
         },
         methods: {
             host_view: self.host_view,
-            new_session: self.new_session
+            new_session: self.new_session,
+            get_playlist: self.get_playlist
         }
 
     });
