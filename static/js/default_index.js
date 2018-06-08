@@ -64,7 +64,7 @@ var app = function() {
             var split = url.split('&list=')
             playlist_id = split[1];
             var str_index = '';
-            var embed = '';
+            var video_id = '';
             console.log(playlist_id)
 
             $.getJSON(playlist_items_url,
@@ -82,18 +82,32 @@ var app = function() {
                         snippet = data.items[str_index].snippet;
                         snippet.votes = 0;
                         
-                        embed='https://www.youtube.com/embed/';
-                        embed+=snippet.resourceId.videoId+'?autoplay=1';
-                        console.log(embed)
-                        snippet.embed=embed;
+                        video_id = snippet.resourceId.videoId;
+                        console.log(video_id)
+                        snippet.video_id=video_id;
                         //console.log(data.items[str_index].snippet.resourceId.videoId);
                         self.vue.videos.push(snippet)
                     }
+                    self.start_video();
                 }
             );
         }
     }
 
+    self.start_video = function() {
+        console.log("starting video")
+        // 2. This code loads the IFrame Player API code asynchronously.
+        var tag = document.createElement('script');
+
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        // 3. This function creates an <iframe> (and YouTube player)
+        //    after the API code downloads.
+        
+        console.log("leaving start_video")
+    }
 
     self.upvote = function(video) {
         for (i=0; i<self.vue.videos.length; i++){
@@ -105,6 +119,9 @@ var app = function() {
                 })       
             }
         }
+        console.log(player)
+        player.loadVideoById(self.vue.videos[0].video_id)
+        console.log(player.getCurrentTime())
     }
 
     self.downvote = function(video) {
@@ -138,7 +155,8 @@ var app = function() {
             new_session: self.new_session,
             get_playlist: self.get_playlist,
             upvote: self.upvote,
-            downvote: self.downvote
+            downvote: self.downvote,
+            start_video: self.start_video
         }
 
     });
@@ -155,3 +173,25 @@ var APP = null;
 // for instance, self.x above would be accessible as APP.x
 jQuery(function(){APP = app();});
 
+var player;
+
+function onYouTubeIframeAPIReady() {
+            console.log("iframe ready")
+            player = new YT.Player('player', {
+            height: '390',
+            width: '640',
+            videoId: APP.vue._data.videos[0].video_id,
+            events: {
+              'onReady': onPlayerReady
+            }
+          });
+        }
+
+// 4. The API will call this function when the video player is ready.
+function onPlayerReady(event) {
+  console.log("player ready")
+  console.log(event.target)
+  event.target.playVideo();
+    console.log(event.target)
+
+}
