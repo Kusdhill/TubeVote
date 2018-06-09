@@ -7,6 +7,7 @@
 <script>
   // Define your URLs here.
   var new_session_url = "{{=URL('api', 'new_session')}}";
+  var get_session_url = "{{=URL('api', 'get_session')}}";
 </script>
 {{include "web2py_ajax.html"}}
 {{end}}
@@ -16,7 +17,7 @@
     <div v-if="!is_host && !is_guest" class="abs_center">
       <h2>Who are you?</h2>
       <button type="button" class="btn btn-dark" v-on:click="host_view">Host</button><br><br>
-      <button type="button" class="btn btn-secondary">Guest</button><br>
+      <button type="button" class="btn btn-secondary" v-on:click="guest_view">Guest</button><br>
     </div>
 
     <!-- HOST VIEW -->
@@ -28,15 +29,19 @@
         <button type="button" class="btn btn-def btn-block" v-on:click="new_session">Login</button>
     </div>
 
+    <!-- GUEST VIEW -->
+    <div v-if="is_guest && !session_gotten">
+        <h2></h2>
+        <input class="form-control" type="text" name='username' value="userA" placeholder="username"/>
+        <input class="form-control" type="text" name='passphrase' value="testabc" placeholder="testabc"/>
+        <button type="button" class="btn btn-def btn-block" v-on:click="get_session">Login</button>
+    </div>
+
     <!-- SESSION CREATED, HOST PLAYER VIEW -->
-    <!-- https://developers.google.com/youtube/iframe_api_reference -->
     <div v-if="is_host && session_created">
       <a href="http://127.0.0.1:8000/TubeVote/default/index">Start over</a>
       <h2>Hello, ${host_name}</h2>
 
-      <!-- 
-      <iframe v-bind:src="videos[0].embed" id="ytplayer" type="text/html" width="640" height="360" frameborder="0"></iframe>
-      -->
       <br>
       <div id="player"></div>
       <br><br>
@@ -62,6 +67,13 @@
       </table>
 
     </div>
+
+    <!-- SESSION GOTTEN, GUEST PLAYER VIEW -->
+    <div v-if="is_guest && session_gotten">
+      <h2>Hello, ${guest_name}</h2>
+      <h4>Welcome to ${session.host_name}'s streaming session</h4>
+    </div>
+
   </div>
 </div>
 <script src="{{=URL('static', 'js/default_index.js')}}"></script>

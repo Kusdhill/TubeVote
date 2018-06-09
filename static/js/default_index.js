@@ -24,6 +24,11 @@ var app = function() {
         self.vue.is_host = true;
     };
 
+    self.guest_view = function() {
+        console.log("guest_view, is_guest is true")
+        self.vue.is_guest = true;
+    };
+
     self.new_session = function (event) {
         // Reads the file.
         var host_name = event.path[1].childNodes[2].value;
@@ -37,18 +42,42 @@ var app = function() {
 
             $.post(new_session_url,
             {
-              host_name: self.vue.image_url,
+              host_name: self.vue.host_name,
               passphrase: self.vue.passphrase,
               playlist_url: self.vue.playlist_url
             },
             function(data) {
-               console.log("new session created")
-               self.vue.users.push(self.vue.host_name)
-               self.get_playlist(self.vue.playlist_url);
-               self.vue.session_created = true;
+                console.log("new session created")
+                self.vue.users.push(self.vue.host_name)
+                self.get_playlist(self.vue.playlist_url);
+                self.vue.session_created = true;
+                self.refresh();
+                self.auto_refresh();
             }
             );
         }
+    };
+
+
+    self.get_session = function(event) {
+        console.log("get_session")
+        var guest_name = event.path[1].childNodes[2].value;
+        var passphrase = event.path[1].childNodes[4].value;
+
+        if(guest_name && passphrase) {
+            self.vue.guest_name = guest_name;
+            self.vue.passphrase = passphrase;
+
+            $.getJSON(get_session_url,
+            {
+                passphrase: passphrase
+            },
+            function(data) {
+                console.log(data.session)
+                self.vue.session = data.session;
+            });
+        }
+        self.vue.session_gotten = true;
     };
 
     self.get_playlist = function(url) {
@@ -93,6 +122,24 @@ var app = function() {
             );
         }
     }
+
+    self.auto_refresh = function () {
+        setInterval(
+            self.refresh, 2000
+        )
+    };
+
+    self.refresh = function () {
+        /*
+        $.get(
+            get_state_url + '?' + $.param({p: self.vue.game_name}),
+            function (data) {
+                //self.vue.youare = data.youare;
+            }
+        );
+        */
+        console.log("refresh")
+    };
 
     self.start_video = function() {
         console.log("starting video")
@@ -141,7 +188,10 @@ var app = function() {
         data: {
             is_host: false,
             is_guest: false,
+            session_gotten: false,
+            session: [],
             host_name: '',
+            guest_name: '',
             passphrase: '',
             playlist_url: '',
             session_created: false,
@@ -150,6 +200,8 @@ var app = function() {
         },
         methods: {
             host_view: self.host_view,
+            guest_view: self.guest_view,
+            get_session: self.get_session,
             new_session: self.new_session,
             get_playlist: self.get_playlist,
             upvote: self.upvote,

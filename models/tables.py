@@ -8,12 +8,11 @@
 # Consult manual for more options, validators, etc.
 
 db.define_table('stream_session',
-    Field('video_time'),
     Field('host_name'),
     Field('passphrase'),
     Field('users'),
     Field('playlist_url'),
-    Field('playing')
+    Field('video_time')
 )
 
 # after defining tables, uncomment below to enable auditing

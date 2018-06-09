@@ -13,3 +13,21 @@ def new_session():
     )
     sesh = db.stream_session(stream_session)
     return response.json(dict(session=sesh))
+
+def get_session():
+    print("getting session")
+
+    passphrase = request.vars.passphrase
+    row = db(db.stream_session.passphrase == passphrase).select()
+    print(row[0])
+    
+    session = dict(
+        host_name=row[0].host_name,
+        users=row[0].users,
+        playlist_url=row[0].playlist_url,
+        video_time=row[0].video_time
+    )
+
+
+
+    return response.json(dict(session=session))
