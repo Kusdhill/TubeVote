@@ -33,10 +33,13 @@
     <div v-if="is_host && session_created">
       <a href="http://127.0.0.1:8000/TubeVote/default/index">Start over</a>
       <h2>Hello, ${host_name}</h2>
+
+      <!-- 
       <iframe v-bind:src="videos[0].embed" id="ytplayer" type="text/html" width="640" height="360" frameborder="0"></iframe>
-
-      <br><br><br>
-
+      -->
+      <br>
+      <div id="player"></div>
+      <br><br>
       <table class="table">
         <thead>
           <tr>

@@ -119,8 +119,6 @@ var app = function() {
                 })       
             }
         }
-        console.log(player)
-        player.loadVideoById(self.vue.videos[0].video_id)
         console.log(player.getCurrentTime())
     }
 
@@ -182,16 +180,29 @@ function onYouTubeIframeAPIReady() {
             width: '640',
             videoId: APP.vue._data.videos[0].video_id,
             events: {
-              'onReady': onPlayerReady
+              'onReady': onPlayerReady,
+              'onStateChange': onPlayerStateChange
             }
           });
         }
 
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady(event) {
-  console.log("player ready")
-  console.log(event.target)
   event.target.playVideo();
-    console.log(event.target)
+}
 
+// when video ends
+function onPlayerStateChange(event) {
+    var videos = APP.vue._data.videos;  
+    if(event.data === 0) {
+
+        // remove finished video from videos
+        var finished_video = event.target.getVideoData().video_id
+        const index = videos.map(function(d) { return d.video_id; }).indexOf(finished_video);
+        videos.splice(index,1);
+        console.log(videos)
+
+        // load the next video from videos
+        player.loadVideoById(videos[0].video_id)
+    }
 }
