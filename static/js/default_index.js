@@ -143,7 +143,8 @@ var app = function() {
         {
           passphrase: self.vue.passphrase,
           videos: test,
-          video_time: self.vue.video_time
+          video_time: self.vue.video_time,
+          paused: self.vue.paused
         },
         function(data) {
             //console.log(data)
@@ -151,6 +152,7 @@ var app = function() {
         }
         );
     }
+
 
 
     self.guest_update = function() {
@@ -164,7 +166,28 @@ var app = function() {
                 self.vue.session = data.session;
                 self.vue.videos = data.session.videos;
                 self.vue.video_time = data.session.video_time;
+                self.vue.paused = data.session.paused;
             });
+
+        if(self.vue.is_host){
+
+            $.post(update_time_url,
+            {
+              passphrase: self.vue.passphrase,
+              video_time: player.getCurrentTime()
+            },
+            function(data) {
+                //console.log(data)
+            }
+            );
+
+        }else{
+            if(self.vue.paused){
+                player.pauseVideo()
+            }else{
+                player.playVideo()
+            }
+        }
     }
 
     self.guest_vote = function() {
@@ -263,7 +286,8 @@ var app = function() {
             session_created: false,
             videos: [],
             users: [],
-            video_time: ''
+            video_time: '',
+            paused: false
         },
         methods: {
             host_view: self.host_view,
@@ -315,9 +339,10 @@ function onYouTubeIframeAPIReady() {
 // 4. The API will call this function when the video player is ready.
 function onPlayerReady(event) {
     if(APP.vue._data.is_guest){
-        console.log(event.target)
-        event.target.playVideo();
-        event.target.seekTo(parseInt(APP.vue._data.video_time))
+        var videos = APP.vue._data.videos;
+        APP.guest_update();
+        console.log(APP.vue._data.video_time)
+        event.target.loadVideoById(videos[0].video_id, parseInt(APP.vue._data.video_time))
     }else{
         APP.update_session();
         event.target.playVideo();
@@ -340,11 +365,20 @@ function onPlayerStateChange(event) {
             // load the next video from videos
             player.loadVideoById(videos[0].video_id)
         }
+        if(event.data === 2){
+            console.log("paused")
+            APP.vue._data.paused = true;
+            APP.update_session();
+        }
+        if(event.data===1){
+            APP.vue._data.paused = false;
+            APP.update_session();
+        }
     }else{
         if(event.data === 0){
             APP.guest_update();
             videos=APP.vue._data.videos;
-            player.loadVideoById(videos[0].video_id)
+            player.loadVideoById(videos[0].video_id, parseInt(APP.vue._data.video_time))
         }
     }
 }

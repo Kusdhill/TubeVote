@@ -75,3 +75,6 @@ CREATE TABLE "stream_session"(
     "video_time" CHAR(512)
 );
 success!
+timestamp: 2018-06-10T16:42:55.742727
+ALTER TABLE "stream_session" ADD "paused" CHAR(1);
+success!

@@ -13,7 +13,8 @@ db.define_table('stream_session',
     Field('users'),
     Field('playlist_url'),
     Field('videos'),
-    Field('video_time')
+    Field('video_time'),
+    Field('paused', 'boolean', default=False)
 )
 
 # after defining tables, uncomment below to enable auditing

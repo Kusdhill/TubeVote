@@ -30,7 +30,8 @@ def get_session():
         users=row.users,
         playlist_url=row.playlist_url,
         video_time=row.video_time,
-        videos=json.loads(row.videos)
+        videos=json.loads(row.videos),
+        paused=row.paused
     )
 
     return response.json(dict(session=session))
@@ -63,6 +64,13 @@ def update_session():
 	#print(json.dumps(video_list))
 	db(db.stream_session.passphrase == request.vars.passphrase).update(
 		video_time=request.vars.video_time,
-		videos=json.dumps(video_list)
+		videos=json.dumps(video_list),
+		paused=request.vars.paused
 	)
 	#return response.json(dict())
+
+def update_time():
+	print("update_time")
+	db(db.stream_session.passphrase == request.vars.passphrase).update(
+		video_time=request.vars.video_time,
+	)
