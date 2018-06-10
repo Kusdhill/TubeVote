@@ -12,6 +12,7 @@ db.define_table('stream_session',
     Field('passphrase'),
     Field('users'),
     Field('playlist_url'),
+    Field('videos'),
     Field('video_time')
 )
 

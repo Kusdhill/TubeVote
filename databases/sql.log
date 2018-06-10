@@ -1,4 +1,4 @@
-timestamp: 2018-06-05T16:17:38.769173
+timestamp: 2018-06-10T15:44:13.775412
 CREATE TABLE "web2py_session_TubeVote"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "locked" CHAR(1),
@@ -9,7 +9,7 @@ CREATE TABLE "web2py_session_TubeVote"(
     "session_data" BLOB
 );
 success!
-timestamp: 2018-06-05T16:17:38.907584
+timestamp: 2018-06-10T15:44:13.895845
 CREATE TABLE "auth_user"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "first_name" CHAR(128),
@@ -21,21 +21,21 @@ CREATE TABLE "auth_user"(
     "registration_id" CHAR(512)
 );
 success!
-timestamp: 2018-06-05T16:17:39.024955
+timestamp: 2018-06-10T15:44:13.989513
 CREATE TABLE "auth_group"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "role" CHAR(512),
     "description" TEXT
 );
 success!
-timestamp: 2018-06-05T16:17:39.146105
+timestamp: 2018-06-10T15:44:14.097989
 CREATE TABLE "auth_membership"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "user_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE  ,
     "group_id" INTEGER REFERENCES "auth_group" ("id") ON DELETE CASCADE  
 );
 success!
-timestamp: 2018-06-05T16:17:39.281723
+timestamp: 2018-06-10T15:44:14.210322
 CREATE TABLE "auth_permission"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "group_id" INTEGER REFERENCES "auth_group" ("id") ON DELETE CASCADE  ,
@@ -44,7 +44,7 @@ CREATE TABLE "auth_permission"(
     "record_id" INTEGER
 );
 success!
-timestamp: 2018-06-05T16:17:39.424119
+timestamp: 2018-06-10T15:44:14.319037
 CREATE TABLE "auth_event"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "time_stamp" TIMESTAMP,
@@ -54,7 +54,7 @@ CREATE TABLE "auth_event"(
     "description" TEXT
 );
 success!
-timestamp: 2018-06-05T16:17:39.574504
+timestamp: 2018-06-10T15:44:14.435703
 CREATE TABLE "auth_cas"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
     "user_id" INTEGER REFERENCES "auth_user" ("id") ON DELETE CASCADE  ,
@@ -64,48 +64,14 @@ CREATE TABLE "auth_cas"(
     "renew" CHAR(1)
 );
 success!
-timestamp: 2018-06-06T12:12:01.067291
+timestamp: 2018-06-10T15:44:14.547800
 CREATE TABLE "stream_session"(
     "id" INTEGER PRIMARY KEY AUTOINCREMENT,
-    "video_time" CHAR(512),
     "host_name" CHAR(512),
     "passphrase" CHAR(512),
     "users" CHAR(512),
     "playlist_url" CHAR(512),
-    "playing" CHAR(512)
+    "videos" CHAR(512),
+    "video_time" CHAR(512)
 );
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
-success!
 success!

@@ -8,6 +8,8 @@
   // Define your URLs here.
   var new_session_url = "{{=URL('api', 'new_session')}}";
   var get_session_url = "{{=URL('api', 'get_session')}}";
+  var update_session_url = "{{=URL('api', 'update_session')}}";
+  var guest_vote_url = "{{=URL('api', 'guest_vote')}}";
 </script>
 {{include "web2py_ajax.html"}}
 {{end}}
@@ -33,7 +35,7 @@
     <div v-if="is_guest && !session_gotten">
         <h2></h2>
         <input class="form-control" type="text" name='username' value="userA" placeholder="username"/>
-        <input class="form-control" type="text" name='passphrase' value="testabc" placeholder="testabc"/>
+        <input class="form-control" type="text" name='passphrase' value="thisisapass" placeholder="thisisapass"/>
         <button type="button" class="btn btn-def btn-block" v-on:click="get_session">Login</button>
     </div>
 
@@ -65,13 +67,36 @@
           </tr>
         </tbody>
       </table>
-
     </div>
 
     <!-- SESSION GOTTEN, GUEST PLAYER VIEW -->
     <div v-if="is_guest && session_gotten">
       <h2>Hello, ${guest_name}</h2>
       <h4>Welcome to ${session.host_name}'s streaming session</h4>
+
+      <br>
+      <div id="player"></div>
+      <br><br>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Title</th>
+            <th scope="col">Description</th>
+            <th scope="col">Votes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="video in videos">
+            <td>${video.title}</td>
+            <td>${video.description}</td>
+            <td>
+              <i class="fa fa-caret-up fa-2x" v-on:click="upvote(video)"></i>
+              <i class="fa fa-caret-down fa-2x" v-on:click="downvote(video)"></i>
+              <div style="text-align:center;">${video.votes}</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
   </div>
