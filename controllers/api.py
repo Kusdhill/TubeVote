@@ -29,7 +29,8 @@ def get_update():
         playlist_url=row.playlist_url,
         video_time=row.video_time,
         videos=json.loads(row.videos),
-        paused=row.paused
+        paused=row.paused,
+        playing=row.playing
     )
 
     return response.json(dict(session=session))
@@ -45,7 +46,8 @@ def put_update():
 	db(db.stream_session.passphrase == request.vars.passphrase).update(
 		video_time=request.vars.video_time,
 		videos=json.dumps(video_list),
-		paused=request.vars.paused
+		paused=request.vars.paused,
+		playing=request.vars.playing
 	)
 	#return response.json(dict())
 

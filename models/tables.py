@@ -13,6 +13,7 @@ db.define_table('stream_session',
     Field('playlist_url'),
     Field('videos'),
     Field('video_time'),
+    Field('playing'),
     Field('paused', 'boolean', default=False)
 )
 
