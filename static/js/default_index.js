@@ -30,7 +30,6 @@ var app = function() {
     };
 
     self.new_session = function (event) {
-        // Reads the file.
         var host_name = event.path[1].childNodes[2].value;
         var passphrase = event.path[1].childNodes[4].value;
         var playlist_url = event.path[1].childNodes[6].value;
@@ -48,7 +47,6 @@ var app = function() {
             },
             function(data) {
                 console.log("new session created")
-                self.vue.users.push(self.vue.host_name)
                 self.get_playlist(self.vue.playlist_url);
                 self.vue.session_created = true;
             }
@@ -56,38 +54,27 @@ var app = function() {
         }
     };
 
-
-    self.get_session = function(event) {
-        console.log("get_session")
+    // logs in guest and calls get_update(), start_video(), and initiates auto_refresh
+    self.login_guest = function(event) {
+        console.log("login_guest")
         var guest_name = event.path[1].childNodes[2].value;
         var passphrase = event.path[1].childNodes[4].value;
 
         if(guest_name && passphrase) {
-            self.vue.guest_name = guest_name;
-            self.vue.passphrase = passphrase;
-
-            $.getJSON(get_session_url,
-            {
-                passphrase: passphrase
-            },
-            function(data) {
-                console.log(data.session)
-                self.vue.session = data.session;
-                self.vue.videos = data.session.videos;
-                self.vue.video_time = data.session.video_time;
-            });
+            self.vue.passphrase = passphrase
+            self.vue.guest_name = guest_name
+            self.get_update();
         }
-        self.vue.session_gotten = true;
-        self.start_video();
-        self.auto_refresh();
     };
 
+    // gets playlist from youtube API, populates videos[] with playist information for each video
     self.get_playlist = function(url) {
         console.log("getting playlist")
         console.log(url)
         var playlist_items_url = 'https://www.googleapis.com/youtube/v3/playlistItems';
         var playlist_id = '';
         
+        // checks that entered URL is a link to a playlist
         if(!url.includes('&list')){
             alert("Please enter a valid playlist url");
             throw new Error("invalid playlist_url");
@@ -96,7 +83,6 @@ var app = function() {
             playlist_id = split[1];
             var str_index = '';
             var video_id = '';
-            console.log(playlist_id)
 
             $.getJSON(playlist_items_url,
                 {
@@ -106,8 +92,6 @@ var app = function() {
                     key: 'AIzaSyA81ZBi5oLSK3xEdPjPaX1XlttqfLBoSIg'
                 },
                 function(data) {
-                    console.log("data")
-                    console.log(data)
                     for (i = 0; i < data.items.length; i++) { 
                         str_index = i.toString();
                         snippet = data.items[str_index].snippet;
@@ -125,120 +109,88 @@ var app = function() {
         }
     }
 
-    self.update_session = function() {
-        console.log("update_session")
+    // puts an updated session state in the database
+    self.put_update = function() {
+        console.log("put_update")
+        if(player)
         self.vue.video_time = player.getCurrentTime()
-        var test = []
-        var lel=''
+        var videos_str = []
+        var string_vid=''
         for (i=0; i<self.vue.videos.length; i++){
-            lel = JSON.stringify(self.vue.videos[i])
-            test.push(lel)
-            //JSON.stringify()
+            string_vid = JSON.stringify(self.vue.videos[i])
+            videos_str.push(string_vid)
         }
-        //console.log(test)
 
-
-
-        $.post(update_session_url,
+        $.post(put_update_url,
         {
           passphrase: self.vue.passphrase,
-          videos: test,
+          videos: videos_str,
           video_time: self.vue.video_time,
           paused: self.vue.paused
         },
         function(data) {
-            //console.log(data)
-            self.guest_update();
+            self.get_update();
         }
         );
     }
 
 
-
-    self.guest_update = function() {
-        console.log("guest_update")
-        $.getJSON(get_session_url,
+    // gets an updated session state
+    self.get_update = function() {
+        console.log("get_update")
+        $.getJSON(get_update_url,
             {
                 passphrase: self.vue.passphrase
             },
             function(data) {
-                //console.log(data.session)
+                console.log(data.session)
                 self.vue.session = data.session;
                 self.vue.videos = data.session.videos;
                 self.vue.video_time = data.session.video_time;
+
+                // guest first time login, start video after update got
+                if(self.vue.is_guest && !self.vue.session_gotten){
+                    self.vue.session_gotten = true;
+                    self.start_video();
+                    self.auto_refresh();
+                }
+
+                if(self.vue.is_guest && self.vue.paused && !data.session.paused && player){
+                    player.playVideo();
+                }
                 self.vue.paused = data.session.paused;
             });
-
-        if(self.vue.is_host){
-
-            $.post(update_time_url,
-            {
-              passphrase: self.vue.passphrase,
-              video_time: player.getCurrentTime()
-            },
-            function(data) {
-                //console.log(data)
-            }
-            );
-
-        }else{
-            if(self.vue.paused){
-                player.pauseVideo()
-            }else{
-                player.playVideo()
-            }
+        if(self.vue.is_guest && self.vue.paused && player){
+            player.pauseVideo();
         }
     }
 
-    self.guest_vote = function() {
-        console.log("guest_vote")
-
-        var test = []
-        var lel=''
-        for (i=0; i<self.vue.videos.length; i++){
-            lel = JSON.stringify(self.vue.videos[i])
-            test.push(lel)
-            //JSON.stringify()
-        }
-
-
-        $.post(update_session_url,
-        {
-          passphrase: self.vue.passphrase,
-          videos: test,
-          video_time: self.vue.video_time
-        },
-        function(data) {
-            //console.log(data)
-        }
-        );
-
-    }
-
-
+    // auto_refresh, calls get_update() every 2 seconds
     self.auto_refresh = function () {
-
         setInterval(
-            self.guest_update, 2000
+            self.get_update, 2000
         )
     };
 
+    // YouTube IFrame Player API
+    // https://developers.google.com/youtube/iframe_api_reference
     self.start_video = function() {
         console.log("starting video")
-        // 2. This code loads the IFrame Player API code asynchronously.
+        // This code loads the IFrame Player API code asynchronously.
         var tag = document.createElement('script');
 
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-        // 3. This function creates an <iframe> (and YouTube player)
-        //    after the API code downloads.
-        
         console.log("leaving start_video")
     }
 
+    // Records an upvote to the appropriate video, calls put_update()
     self.upvote = function(video) {
+        console.log("upvote")
+
+        // sorts the list after an upvote. Video ID with most votes is in 0th index of videos[]
         for (i=0; i<self.vue.videos.length; i++){
             if(video.title===self.vue.videos[i].title){
                 self.vue.videos[i].votes+=1;
@@ -248,14 +200,10 @@ var app = function() {
                 })       
             }
         }
-        console.log("upvote")
-        if(self.vue.is_guest){
-            console.log("is_guest")
-            self.guest_vote();
-        }
-        if(self.vue.is_host){self.update_session()}
+        self.put_update();
     }
 
+    // Records a downvote to the appropriate video, calls put_update()
     self.downvote = function(video) {
         for (i=0; i<self.vue.videos.length; i++){
             if(video.title===self.vue.videos[i].title){
@@ -266,8 +214,7 @@ var app = function() {
                 })
             }
         }
-        if(self.vue.is_guest){self.guest_vote()}
-        if(self.vue.is_host){self.update_session()}
+        self.put_update();
     }
 
     self.vue = new Vue({
@@ -285,20 +232,19 @@ var app = function() {
             playlist_url: '',
             session_created: false,
             videos: [],
-            users: [],
             video_time: '',
             paused: false
         },
         methods: {
             host_view: self.host_view,
             guest_view: self.guest_view,
-            get_session: self.get_session,
+            login_guest: self.login_guest,
             new_session: self.new_session,
             get_playlist: self.get_playlist,
             upvote: self.upvote,
             downvote: self.downvote,
             start_video: self.start_video,
-            update_session: self.update_session
+            put_update: self.put_update
         }
 
     });
@@ -316,9 +262,10 @@ var APP = null;
 jQuery(function(){APP = app();});
 
 
-
+// This function creates an <iframe> (and YouTube player) after the API code downloads.
 function onYouTubeIframeAPIReady() {
             console.log("iframe ready")
+            APP.get_update();
             player = new YT.Player('player', {
             height: '390',
             width: '640',
@@ -326,9 +273,12 @@ function onYouTubeIframeAPIReady() {
             events: {
               'onReady': onPlayerReady,
               'onStateChange': onPlayerStateChange
+            },
+            playerVars: { 
+                'controls': 1,
+                'showinfo': 0
             }
           });
-            console.log('lel')
             console.log(APP.auto_refresh)
             if(APP.vue._data.is_host){
                 APP.auto_refresh()    
@@ -336,23 +286,24 @@ function onYouTubeIframeAPIReady() {
             
         }
 
-// 4. The API will call this function when the video player is ready.
+// The API will call this function when the video player is ready.
 function onPlayerReady(event) {
     if(APP.vue._data.is_guest){
         var videos = APP.vue._data.videos;
-        APP.guest_update();
+        APP.get_update();
         console.log(APP.vue._data.video_time)
         event.target.loadVideoById(videos[0].video_id, parseInt(APP.vue._data.video_time))
     }else{
-        APP.update_session();
+        APP.put_update();
         event.target.playVideo();
     }
 }
 
-// when video ends
+// When video state changes
 function onPlayerStateChange(event) {
     var videos = APP.vue._data.videos;
     if(APP.vue._data.is_host){  
+        // When video ends
         if(event.data === 0) {
 
             // remove finished video from videos
@@ -361,22 +312,24 @@ function onPlayerStateChange(event) {
             videos.splice(index,1);
             console.log(videos)
             APP.vue._data.videos = videos
-            APP.update_session();
+            APP.put_update();
             // load the next video from videos
             player.loadVideoById(videos[0].video_id)
         }
+        // When video is paused
         if(event.data === 2){
             console.log("paused")
             APP.vue._data.paused = true;
-            APP.update_session();
+            APP.put_update();
         }
+        // When video is playing
         if(event.data===1){
             APP.vue._data.paused = false;
-            APP.update_session();
+            APP.put_update();
         }
     }else{
         if(event.data === 0){
-            APP.guest_update();
+            APP.get_update();
             videos=APP.vue._data.videos;
             player.loadVideoById(videos[0].video_id, parseInt(APP.vue._data.video_time))
         }

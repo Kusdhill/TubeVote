@@ -7,10 +7,8 @@
 <script>
   // Define your URLs here.
   var new_session_url = "{{=URL('api', 'new_session')}}";
-  var get_session_url = "{{=URL('api', 'get_session')}}";
-  var update_session_url = "{{=URL('api', 'update_session')}}";
-  var guest_vote_url = "{{=URL('api', 'guest_vote')}}";
-  var update_time_url = "{{=URL('api', 'update_time')}}";
+  var get_update_url = "{{=URL('api', 'get_update')}}";
+  var put_update_url = "{{=URL('api', 'put_update')}}";
 
 </script>
 {{include "web2py_ajax.html"}}
@@ -20,25 +18,25 @@
     <!-- Your code goes here. -->
     <div v-if="!is_host && !is_guest" class="abs_center">
       <h2>Who are you?</h2>
-      <button type="button" class="btn btn-dark" v-on:click="host_view">Host</button><br><br>
-      <button type="button" class="btn btn-secondary" v-on:click="guest_view">Guest</button><br>
+      <button type="button" class="btn btn-info ml-5" v-on:click="host_view">Host</button><br><br>
+      <button type="button" class="btn btn-success ml-5" v-on:click="guest_view">Guest</button><br>
     </div>
 
     <!-- HOST VIEW -->
     <div v-if="is_host && !session_created">
         <h2></h2>
-        <input class="form-control" type="text" name='username' value="Kunal" placeholder="username"/>
-        <input class="form-control" type="text" name='passphrase' value="thisisapass" placeholder="passphrase"/>
-        <input class="form-control" type="text" name='playlist_url' value="https://www.youtube.com/watch?v=q6EoRBvdVPQ&list=PLOy0j9AvlVZPto6IkjKfpu0Scx--7PGTC" placeholder="playlist url"/>
+        <input class="form-control" type="text" name='username' placeholder="username" value="kunal"/>
+        <input class="form-control" type="text" name='passphrase' placeholder="passphrase" value="a4"/>
+        <input class="form-control" type="text" name='playlist_url' placeholder="playlist url" value="https://www.youtube.com/watch?v=OPf0YbXqDm0&list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj"/>
         <button type="button" class="btn btn-def btn-block" v-on:click="new_session">Login</button>
     </div>
 
     <!-- GUEST VIEW -->
     <div v-if="is_guest && !session_gotten">
         <h2></h2>
-        <input class="form-control" type="text" name='username' value="userA" placeholder="username"/>
-        <input class="form-control" type="text" name='passphrase' value="thisisapass" placeholder="thisisapass"/>
-        <button type="button" class="btn btn-def btn-block" v-on:click="get_session">Login</button>
+        <input class="form-control" type="text" name='username' placeholder="username" value="bob"/>
+        <input class="form-control" type="text" name='passphrase' placeholder="passphrase" value="a4"/>
+        <button type="button" class="btn btn-def btn-block" v-on:click="login_guest">Login</button>
     </div>
 
     <!-- SESSION CREATED, HOST PLAYER VIEW -->

@@ -6,28 +6,26 @@ from gluon.utils import web2py_uuid
 
 # Here go your api methods.
 def new_session():
+    print("new_session")
     stream_session = db.stream_session.insert(
         host_name=request.vars.host_name,
         passphrase=request.vars.passphrase,
         playlist_url=request.vars.playlist_url
     )
     sesh = db.stream_session(stream_session)
+    print(sesh)
     return response.json(dict(session=sesh))
 
-def get_session():
-    print("getting session")
-
+### gets an updated session state
+def get_update():
+    print("getting update")
     passphrase = request.vars.passphrase
-    print(passphrase)
     row = db(db.stream_session.passphrase == passphrase).select().first()
-    print(row)
-    #d = json.loads(row[0].videos)
-    load =json.loads(row.videos)
 
+    load =json.loads(row.videos)
     
     session = dict(
         host_name=row.host_name,
-        users=row.users,
         playlist_url=row.playlist_url,
         video_time=row.video_time,
         videos=json.loads(row.videos),
@@ -36,32 +34,14 @@ def get_session():
 
     return response.json(dict(session=session))
 
-def guest_vote():
-	print("guest vote")
-	video_str = request.vars['videos[]']
-	video_list = []
-
-	for video in video_str:
-		print(video)
-		video_list.append(json.loads(video))
-
-	#print(json.dumps(video_list))
-	print("UPDATING")
-	db(db.stream_session.passphrase == request.vars.passphrase).update(
-		videos=json.dumps(video_list)
-	)
-
-
-def update_session():
-	print("update_session")
-	#print(request.vars)
-	#print("\n")
+### puts an updated session state in the database
+def put_update():
+	print("put_update")
 	video_str = request.vars['videos[]']
 	video_list = []
 	for video in video_str:
 		video_list.append(json.loads(video))
 
-	#print(json.dumps(video_list))
 	db(db.stream_session.passphrase == request.vars.passphrase).update(
 		video_time=request.vars.video_time,
 		videos=json.dumps(video_list),
@@ -69,8 +49,9 @@ def update_session():
 	)
 	#return response.json(dict())
 
+
 def update_time():
 	print("update_time")
 	db(db.stream_session.passphrase == request.vars.passphrase).update(
-		video_time=request.vars.video_time,
+		video_time=request.vars.video_time
 	)
