@@ -14,11 +14,12 @@
 </script>
 {{include "web2py_ajax.html"}}
 {{end}}
+<body style="background-color: #1a1a1a;">
 <div class="main_content">
   <div id="vue-div" class="display:none">
     <!-- Your code goes here. -->
     <div v-if="!is_host && !is_guest" class="abs_center">
-      <h2>Who are you?</h2>
+      <h2 style="color: white;">Who are you?</h2>
       <button type="button" class="btn btn-info ml-5" v-on:click="host_view">Host</button><br><br>
       <button type="button" class="btn btn-success ml-5" v-on:click="guest_view">Guest</button><br>
     </div>
@@ -26,24 +27,24 @@
     <!-- HOST VIEW -->
     <div v-if="is_host && !session_created">
         <h2></h2>
-        <input class="form-control" type="text" name='username' placeholder="username" value="kunal"/>
-        <input class="form-control" type="text" name='passphrase' placeholder="passphrase" value="a4"/>
-        <input class="form-control" type="text" name='playlist_url' placeholder="playlist url" value="https://www.youtube.com/watch?v=OPf0YbXqDm0&list=PLMC9KNkIncKtPzgY-5rmhvj7fax8fdxoj"/>
+        <input class="form-control" type="text" name='username' placeholder="username"/>
+        <input class="form-control" type="text" name='passphrase' placeholder="passphrase"/>
+        <input class="form-control" type="text" name='playlist_url' placeholder="playlist url"/>
         <button type="button" class="btn btn-def btn-block" v-on:click="new_session">Login</button>
     </div>
 
     <!-- GUEST VIEW -->
     <div v-if="is_guest && !session_gotten">
         <h2></h2>
-        <input class="form-control" type="text" name='username' placeholder="username" value="bob"/>
-        <input class="form-control" type="text" name='passphrase' placeholder="passphrase" value="a4"/>
+        <input class="form-control" type="text" name='username' placeholder="username"/>
+        <input class="form-control" type="text" name='passphrase' placeholder="passphrase"/>
         <button type="button" class="btn btn-def btn-block" v-on:click="login_guest">Login</button>
     </div>
 
     <!-- SESSION CREATED, HOST PLAYER VIEW -->
     <div v-if="is_host && session_created">
       <a href="http://127.0.0.1:8000/TubeVote/default/index">Start over</a>
-      <h2>Hello, ${host_name}</h2>
+      <h2 style="color:white;">Hello, ${host_name}</h2>
 
       <br>
       <div id="player"></div>
@@ -51,19 +52,19 @@
       <table class="table">
         <thead>
           <tr>
-            <th scope="col">Title</th>
-            <th scope="col">Description</th>
-            <th scope="col">Votes</th>
+            <th scope="col" style="color:white;">Title</th>
+            <th scope="col" style="color:white;">Description</th>
+            <th scope="col" style="color:white;">Votes</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="video in videos">
-            <td>${video.title}</td>
-            <td>${video.description}</td>
+            <td style="color:white;">${video.title}</td>
+            <td style="color:white;">${video.description}</td>
             <td>
-              <i class="fa fa-caret-up fa-2x" v-on:click="upvote(video)"></i>
-              <i class="fa fa-caret-down fa-2x" v-on:click="downvote(video)"></i>
-              <div style="text-align:center;">${video.votes}</div>
+              <i class="fa fa-caret-up fa-2x" style="color:white;" v-on:click="upvote(video)"></i>
+              <i class="fa fa-caret-down fa-2x" style="color:white;"  v-on:click="downvote(video)"></i>
+              <div style="text-align:center; color:white;">${video.votes}</div>
             </td>
           </tr>
         </tbody>
@@ -81,19 +82,19 @@
       <table class="table">
         <thead>
           <tr>
-            <th scope="col">Title</th>
-            <th scope="col">Description</th>
-            <th scope="col">Votes</th>
+            <th scope="col" style="color:white;">Title</th>
+            <th scope="col" style="color:white;">Description</th>
+            <th scope="col" style="color:white;">Votes</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="video in videos">
-            <td>${video.title}</td>
-            <td>${video.description}</td>
+            <td style="color:white;">${video.title}</td>
+            <td style="color:white;">${video.description}</td>
             <td>
-              <i class="fa fa-caret-up fa-2x" v-on:click="upvote(video)"></i>
-              <i class="fa fa-caret-down fa-2x" v-on:click="downvote(video)"></i>
-              <div style="text-align:center;">${video.votes}</div>
+              <i class="fa fa-caret-up fa-2x" style="color:white;" v-on:click="upvote(video)"></i>
+              <i class="fa fa-caret-down fa-2x" style="color:white;" v-on:click="downvote(video)"></i>
+              <div style="text-align:center; color:white;">${video.votes}</div>
             </td>
           </tr>
         </tbody>
@@ -102,4 +103,5 @@
 
   </div>
 </div>
+</body>
 <script src="{{=URL('static', 'js/default_index.js')}}"></script>
