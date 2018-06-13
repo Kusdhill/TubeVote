@@ -109,7 +109,9 @@ var app = function() {
     // puts an updated session state in the database
     self.put_update = function() {
         console.log("put_update")
+        self.vue.put_running = true;
         if(self.vue.is_host && player) {
+            console.log(player)
             self.vue.video_time = player.getCurrentTime()
             self.vue.playing = player.getVideoData().video_id
         }
@@ -129,7 +131,7 @@ var app = function() {
           playing: self.vue.playing
         },
         function(data) {
-            self.get_update();
+            self.vue.put_running = false;
         }
         );
     }
@@ -137,32 +139,35 @@ var app = function() {
 
     // gets an updated session state
     self.get_update = function() {
-        console.log("get_update")
-        $.getJSON(get_update_url,
-            {
-                passphrase: self.vue.passphrase
-            },
-            function(data) {
-                //console.log(data.session)
-                self.vue.session = data.session;
-                self.vue.videos = data.session.videos;
-                self.vue.video_time = data.session.video_time;
-                self.vue.playing = data.session.playing;
+        // dont want to overwrite puts with gets
+        if(!self.vue.put_running){
+            console.log("get_update")
+            $.getJSON(get_update_url,
+                {
+                    passphrase: self.vue.passphrase
+                },
+                function(data) {
+                    //console.log(data.session)
+                    self.vue.session = data.session;
+                    self.vue.videos = data.session.videos;
+                    self.vue.video_time = data.session.video_time;
+                    self.vue.playing = data.session.playing;
 
-                // guest first time login, start video after update got
-                if(self.vue.is_guest && !self.vue.session_gotten){
-                    self.vue.session_gotten = true;
-                    self.start_video();
-                    self.auto_refresh();
-                }
+                    // guest first time login, start video after update got
+                    if(self.vue.is_guest && !self.vue.session_gotten){
+                        self.vue.session_gotten = true;
+                        self.start_video();
+                        self.auto_refresh();
+                    }
 
-                if(self.vue.is_guest && self.vue.paused && !data.session.paused && player){
-                    player.playVideo();
-                }
-                self.vue.paused = data.session.paused;
-            });
-        if(self.vue.is_guest && self.vue.paused && player){
-            player.pauseVideo();
+                    if(self.vue.is_guest && self.vue.paused && !data.session.paused && player){
+                        player.playVideo();
+                    }
+                    self.vue.paused = data.session.paused;
+                });
+            if(self.vue.is_guest && self.vue.paused && player){
+                player.pauseVideo();
+            }
         }
     }
 
@@ -181,19 +186,18 @@ var app = function() {
         );
     }
 
-    // auto_refresh, calls get_update() every 2 seconds
+    // auto_refresh, calls get_update() every 1.5 seconds
     self.auto_refresh = function () {
         setInterval(
-            self.get_update, 2000
+            self.get_update, 1500
         )
     };
 
-    // calls update_time() every 2 seconds
     self.auto_time = function () {
         setInterval(
-                self.update_time, 2000
-            )
-    }
+            self.update_time, 2500
+        )
+    };
 
     // YouTube IFrame Player API
     // https://developers.google.com/youtube/iframe_api_reference
@@ -213,31 +217,44 @@ var app = function() {
     self.upvote = function(video) {
         console.log("upvote")
 
-        // sorts the list after an upvote. Video ID with most votes is in 0th index of videos[]
-        for (i=0; i<self.vue.videos.length; i++){
-            if(video.title===self.vue.videos[i].title){
-                self.vue.videos[i].votes+=1;
+        // verifying that you have not already upvoted
+        if(!self.vue.upvoted){
+            // sorts the list after an upvote. Video ID with most votes is in 0th index of videos[]
+            for (i=0; i<self.vue.videos.length; i++){
+                if(video.title===self.vue.videos[i].title){
+                    self.vue.videos[i].votes+=1;
 
-                self.vue.videos.sort(function(a,b) {
-                    return b.votes - a.votes
-                })       
+                    self.vue.videos.sort(function(a,b) {
+                        return b.votes - a.votes
+                    })       
+                }
             }
+            self.vue.upvoted = true;
+            self.put_update();
+        }else{
+            alert("You have already upvoted. Wait for the next video.")
         }
-        self.put_update();
     }
 
     // Records a downvote to the appropriate video, calls put_update()
     self.downvote = function(video) {
-        for (i=0; i<self.vue.videos.length; i++){
-            if(video.title===self.vue.videos[i].title){
-                self.vue.videos[i].votes-=1;
+        console.log("downvote")
+        // verifying that you have not already downvoted
+        if(!self.vue.downvoted){
+            for (i=0; i<self.vue.videos.length; i++){
+                if(video.title===self.vue.videos[i].title){
+                    self.vue.videos[i].votes-=1;
 
-                self.vue.videos.sort(function(a,b) {
-                    return b.votes - a.votes
-                })
+                    self.vue.videos.sort(function(a,b) {
+                        return b.votes - a.votes
+                    })
+                }
             }
+            self.vue.downvoted = true;
+            self.put_update();
+        }else{
+            alert("You have already downvoted. Wait for the next video.")
         }
-        self.put_update();
     }
 
     self.vue = new Vue({
@@ -257,7 +274,10 @@ var app = function() {
             videos: [],
             video_time: '',
             paused: false,
-            playing: ''
+            playing: '',
+            upvoted: false,
+            downvoted: false,
+            put_running: false
         },
         methods: {
             host_view: self.host_view,
@@ -305,7 +325,6 @@ function onYouTubeIframeAPIReady() {
           });
             if(APP.vue._data.is_host){
                 APP.auto_refresh();
-                APP.auto_time();    
             }
             
         }
@@ -318,24 +337,32 @@ function onPlayerReady(event) {
         event.target.loadVideoById(data.playing, parseInt(data.video_time))
     }else{
         APP.put_update();
+        APP.auto_time();
         event.target.playVideo();
     }
 }
 
 // When video state changes
 function onPlayerStateChange(event) {
-    var videos = APP.vue._data.videos;
+    
     if(APP.vue._data.is_host){  
         // When video ends
+        console.log(event.data)
         if(event.data === 0) {
-
+            var videos = APP.vue._data.videos;
             // remove finished video from videos
             var finished_video = event.target.getVideoData().video_id
             const index = videos.map(function(d) { return d.video_id; }).indexOf(finished_video);
+            
+            console.log("splicing")
+            console.log(videos[index])
+
             videos.splice(index,1);
             APP.vue._data.videos = videos
             // load the next video from videos
             player.loadVideoById(videos[0].video_id)
+            APP.vue._data.upvoted = false;
+            APP.vue._data.downvoted = false;
             APP.put_update();
         }
         // When video is paused
@@ -346,7 +373,9 @@ function onPlayerStateChange(event) {
         }
         // When video is playing
         if(event.data===1){
-            APP.vue._data.paused = false;
+            if(APP.vue._data.paused){
+                APP.vue._data.paused = false;
+            }
             APP.put_update();
         }
     }else{
@@ -354,6 +383,8 @@ function onPlayerStateChange(event) {
             APP.get_update();
             videos=APP.vue._data.videos;
             player.loadVideoById(APP.vue._data.playing, parseInt(APP.vue._data.video_time))
+            APP.vue._data.upvoted = false;
+            APP.vue._data.downvoted = false;
         }
     }
 }
