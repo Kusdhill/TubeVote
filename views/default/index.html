@@ -43,7 +43,7 @@
 
     <!-- SESSION CREATED, HOST PLAYER VIEW -->
     <div v-if="is_host && session_created">
-      <a href="http://127.0.0.1:8000/TubeVote/default/index">Start over</a>
+      <a href="http://kusdhill.pythonanywhere.com/tubevote">Start over</a>
       <h2 style="color:white;">Hello, ${host_name}</h2>
 
       <br>
@@ -73,8 +73,9 @@
 
     <!-- SESSION GOTTEN, GUEST PLAYER VIEW -->
     <div v-if="is_guest && session_gotten">
-      <h2>Hello, ${guest_name}</h2>
-      <h4>Welcome to ${session.host_name}'s streaming session</h4>
+    <a href="http://kusdhill.pythonanywhere.com/tubevote">Start over</a>
+      <h2 style="color:white;">Hello, ${guest_name}</h2>
+      <h4 style="color:white;">Welcome to ${session.host_name}'s streaming session</h4>
 
       <br>
       <div id="player"></div>
